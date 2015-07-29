@@ -1,0 +1,95 @@
+<div id="midsection">
+  <div class="row">
+    {% include "_template/sidebar" %}
+    <section id="content" class="columns op">
+      <h1>{{ tag.name }}</h1>
+      <ul class="breadcrumbs">
+        <li><a href="{{ home_url }}" title="{{ store.name }}"><i class="fa fa-home"></i></a></li>
+        <li><a href="javascript:void(0);">{{ tag.name }}</a></li>
+      </ul>
+      {% if tag.image_url %}
+      <div class="category-info"><img src="{{ tag.image_url }}" title="{{ tag.name }}" alt="{{ tag.name }}" /></div>
+      {% endif %}
+      {% if tag.description %}
+      <div class="category-info">{{ tag.description }}</div>
+      {% endif %}
+      <hr>
+      
+      <!-- Captura url base -->
+      {% assign split_url = current_url | split: '?' %}
+      {% for order_url in split_url %}
+        {% if forloop.first %}
+          {% assign base_url = order_url %}
+        {% endif %}
+      {% endfor %}
+
+      <!-- Verifica se algum ordenamento esta sendo usado e gera url dos selects -->
+      {% if params.limit and params.ordem %}
+        {% capture new_url_order %}{{ base_url }}?&limit={{ params.limit }}{% endcapture %}
+        {% capture new_url_limit %}{{ base_url }}?ordem={{ params.ordem }}{% endcapture %}
+      {% else %}
+        {% capture new_url_order %}{{ base_url }}?{% endcapture %}
+        {% capture new_url_limit %}{{ base_url }}?{% endcapture %}
+        {% if params.limit %}
+          {% capture new_url_order %}{{ base_url }}?limit={{ params.limit }}{% endcapture %}
+          {% capture new_url_limit %}{{ base_url }}?{% endcapture %}
+        {% endif %}
+        {% if params.order %}
+          {% capture new_url_order %}{{ base_url }}?}{% endcapture %}
+          {% capture new_url_limit %}{{ base_url }}?ordem={{ params.ordem }}{% endcapture %}
+        {% endif %}
+      {% endif %}
+
+      <!-- Se não há limit definido, seta o padrão -->
+      {% if params.limit %}
+        {% assign limitperpage = params.limit plus: 0  %}
+      {% else %}
+        {% assign limitperpage = 24 %}
+      {% endif %}
+
+      <!-- Se não há ordem dewfinida, seta a padrão -->
+      {% if params.ordem %}
+        {% assign orderby = params.ordem %}
+      {% else %}
+        {% assign orderby = %}
+      {% endif %}
+
+      <div class="product-filter">
+        <div class="display">
+          <button type="button" id="list-view" class="btn btn-defaul" title="List">
+            <img src="http://b1.vnda.com.br/ortoponto/images/icon_list.png" alt="List" title="List" />
+          </button>
+          <button type="button" id="grid-view" class="btn btn-default" title="Grid">
+            <img src="http://b1.vnda.com.br/ortoponto/images/icon_grid.png" alt="Grid" title="Grid" />
+          </button>
+        </div>
+        <div class="product-compare">
+          <a href="javascript:void(0);" id="compare-total" class="button">{{ tag.products_count }} itens encontrados</a>
+        </div>
+        <div class="limit">
+          Listar
+          <select id="input-limit" class="form-control" onchange="location = this.value;">
+            <option value="{{ new_url_limit }}&limit=12" {% if limitperpage == 12 or limitperpage == '12' %}selected="selected"{% endif %}> 12 </option>
+            <option value="{{ new_url_limit }}&limit=24" {% if limitperpage == 24 or limitperpage == '24' %}selected="selected"{% endif %}> 24 </option>
+            <option value="{{ new_url_limit }}&limit=36" {% if limitperpage == 36 or limitperpage == '36' %}selected="selected"{% endif %}> 36 </option>
+          </select>
+          itens
+        </div>
+        <div class="sort">
+          Ordenar por:
+          <select id="input-sort" class="form-control" onchange="location = this.value;">
+            <option {% if orderby == '' %}selected="selected"{% endif %} value="{{ new_url_order }}">Padrão </option>
+            <option {% if orderby == 'newest' %}selected="selected"{% endif %} value="{{ new_url_order }}&ordem=newest">Recentes</option>
+            <option {% if orderby == 'newest,desc' %}selected="selected"{% endif %} value="{{ new_url_order }}&ordem=newest,desc">Antigos </option>
+            <option {% if orderby == 'price' %}selected="selected"{% endif %} value="{{ new_url_order }}&ordem=price">Menor Preço</option>
+            <option {% if orderby == 'price,desc' %}selected="selected"{% endif %} value="{{ new_url_order }}&ordem=price,desc">Maior Preço</option>
+          </select>
+        </div>
+      </div>
+      {% products tag:tag.name parent_tag:parent_tag.name page:params.page filter:Tamanho:params.tamanho filter:Cor:params.cor sort:orderby per_page:limitperpage  %}
+        {% include "_commons/list_products" %}
+      {% endproducts %}
+      {{ pagination }}
+    </section>
+  </div>
+</div>
